@@ -9,3 +9,9 @@
 </svelte:head>
 
 {@render children()}
+
+<style>
+	:global(*) {
+		box-sizing: border-box;
+	}
+</style>

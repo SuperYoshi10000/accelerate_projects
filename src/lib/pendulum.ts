@@ -36,17 +36,17 @@ export class PendulumPart implements Vector2 {
     y: number = -1;
 
     velocity: number = 0;
-
-    display: PendulumDisplay = new PendulumDisplay();
+    acceleration: number = 0;
     
+    // Rendering
+    display: PendulumDisplay = new PendulumDisplay();
     previousPositions: PendulumState[] = [];
 
     next(dt: number, acceleration: number) {
+        this.acceleration = acceleration;
         this.velocity += acceleration * dt;
         this.angle += this.velocity * dt;
     }
-
-
 
     draw(ctx: CanvasRenderingContext2D, time: number, parentPos: Vector2, view: View) {
         const drawFadeTime = this.display.drawFadeTime || 0;
@@ -75,18 +75,19 @@ export class PendulumPart implements Vector2 {
 }
 
 
-export class Pendulum {
-    gravity: number = 9.81;
+export class PendulumSet {
+    gravity: number = 9.80665;
     position: Vector2 = { x: 0, y: 0 };
     view: View = new View();
     rootDisplay: PendulumDisplay = new PendulumDisplay();
-    parts: PendulumPart[] = [];
+    parts: PendulumPart[];
     readonly count: number;
 
     constructor(count: "single" | "double" | number = "double") {
         if (count === "single") this.count = 1;
         else if (count === "double") this.count = 2;
         else this.count = count;
+        this.parts = Array.from({length: this.count}, (v, k) => new PendulumPart());
     }
 
     next(dt: number) {
