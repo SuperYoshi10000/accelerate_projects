@@ -15,8 +15,8 @@ export class View implements Vector2 {
 
     calcPosXY(pos: Vector2): [number, number] {
         return [
-            (this.x + pos.x) * this.scale,
-            (this.y + pos.y) * this.scale
+            (this.x - pos.x) * this.scale,
+            (this.y - pos.y) * this.scale // Negative because canvas y increases when going down
         ];
     }
 }
@@ -42,22 +42,26 @@ export class PendulumPart implements Vector2 {
     display: PendulumDisplay = new PendulumDisplay();
     previousPositions: PendulumState[] = [];
 
-    next(dt: number, acceleration: number) {
+    next(dt: number, acceleration: number, parentPos?: Vector2) {
         this.acceleration = acceleration;
         this.velocity += acceleration * dt;
         this.angle += this.velocity * dt;
+
+        this.x = this.length * Math.sin(this.angle) + (parentPos?.x ?? 0);
+        this.y = -(this.length * Math.cos(this.angle) + (parentPos?.y ?? 0));
     }
 
     draw(ctx: CanvasRenderingContext2D, time: number, parentPos: Vector2, view: View) {
         const drawFadeTime = this.display.drawFadeTime || 0;
         
         // Remove old positions
-        while (drawFadeTime >= 0 && this.previousPositions[0].time < time - drawFadeTime) {
+        while (drawFadeTime >= 0 && this.previousPositions[0]?.time < time - drawFadeTime) {
             this.previousPositions.shift();
         }
 
         // Previous positions
         for (const pos of this.previousPositions) {
+            // console.log(pos);
             const alpha = drawFadeTime > 0 ? 1 - (time - pos.time) / drawFadeTime : 1;
             ctx.strokeStyle = this.display.drawColor || "black";
             ctx.lineWidth = this.display.drawWidth || 1;
@@ -68,7 +72,7 @@ export class PendulumPart implements Vector2 {
         }
         ctx.globalAlpha = 1;        
 
-        this.display.drawPoint(ctx, this, view); // Ball
+        this.display.drawPoint(ctx, this, view); // Bob
         this.display.drawLine(ctx, parentPos, this, view); // Rod
     }
 
@@ -78,19 +82,21 @@ export class PendulumPart implements Vector2 {
 export class PendulumSet {
     gravity: number = 9.80665;
     position: Vector2 = { x: 0, y: 0 };
-    view: View = new View();
+    view: View;
     rootDisplay: PendulumDisplay = new PendulumDisplay();
     parts: PendulumPart[];
     readonly count: number;
 
-    constructor(count: "single" | "double" | number = "double") {
+    constructor(count: "single" | "double" | number = "double", view?: View) {
         if (count === "single") this.count = 1;
         else if (count === "double") this.count = 2;
         else this.count = count;
         this.parts = Array.from({length: this.count}, (v, k) => new PendulumPart());
+        this.view = view ?? new View();
     }
 
     next(dt: number) {
+        console.log(this);
         if (this.count === 1) {}
         if (this.count === 2) {
             // Note: t (theta) = angle (because a is used for acceleration)

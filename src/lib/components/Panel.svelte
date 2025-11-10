@@ -1,7 +1,7 @@
 <script lang="ts">
     export let name: string = "";
 
-    export type distance = number | string;
+    type distance = number | string;
 
     export let top: distance | null = null;
     export let bottom: distance | null = null;

@@ -1,13 +1,17 @@
 <script lang="ts">
-  import Field from "$lib/components/Field.svelte";
-  import FieldList from "$lib/components/FieldList.svelte";
-  import Panel from "$lib/components/Panel.svelte";
-    import {PendulumSet} from "$lib/pendulum";
+    import Button from "$lib/components/Button.svelte";
+    import Field from "$lib/components/Field.svelte";
+    import FieldList from "$lib/components/FieldList.svelte";
+    import Panel from "$lib/components/Panel.svelte";
+    import {PendulumSet, View} from "$lib/pendulum";
     let canvas: HTMLCanvasElement;
     let ctx: CanvasRenderingContext2D;
+    let canvasWidth = 800;
+    let canvasHeight = 600;
 
+    let view = new View();
     let background = "#FFFFFF";
-    let pendulumSet = new PendulumSet(2);
+    let pendulumSet = new PendulumSet(2, view);
     let running = false;
 
     function draw() {
@@ -16,11 +20,15 @@
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         let center = pendulumSet.position;
         pendulumSet.rootDisplay.drawPoint(ctx, center, pendulumSet.view);
+        for (let [index, part] of pendulumSet.parts.entries()) {
+            part.draw(ctx, performance.now(), index === 0 ? center : pendulumSet.parts[index - 1], pendulumSet.view);
+        }
     }
 
-    function update(dt: number) {
-        if (running) pendulumSet.next(dt);
+    function update(dt: number, stepMode: boolean = false) {
+        if (running || stepMode) pendulumSet.next(dt);
         draw();
+        // console.log(pendulumSet);
     }
     function loop(startTime: number = performance.now()) {
         let lastTime = startTime;
@@ -37,11 +45,13 @@
     function load(element: HTMLCanvasElement) {
         canvas = element;
         ctx = canvas.getContext("2d")!;
+        view.x = canvasWidth / 200;
+        view.y = canvasHeight / 200;
         loop();
     }
 </script>
 
-<canvas id="pendulum" use:load></canvas>
+<canvas id="pendulum" width={canvasWidth} height={canvasHeight} use:load></canvas>
 
 <Panel top="10px" right="10px" width="420px" maxheight="calc(100% - 20px)" name="Pendulum Controls">
     <div id="debug">
@@ -62,6 +72,8 @@
         </FieldList>
     </div>
 </Panel>
+<Button action={() => running = !running}>{running ? "Pause" : "Start"}</Button>
+<Button action={() => update(1/60, true)}>Step</Button>
 
 <style>
     :global(body) {
@@ -70,7 +82,7 @@
     }
     canvas {
         display: block;
-        width: 100vw;
-        height: 100vh;
+        width: 800px;
+        height: 600px;
     }
 </style>
