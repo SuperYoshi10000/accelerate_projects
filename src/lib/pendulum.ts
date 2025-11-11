@@ -39,14 +39,20 @@ export class PendulumPart implements Vector2 {
     acceleration: number = 0;
     
     // Rendering
-    display: PendulumDisplay = new PendulumDisplay();
+    display: PendulumDisplay;
     previousPositions: PendulumState[] = [];
 
-    next(dt: number, acceleration: number, parentPos?: Vector2) {
+    constructor(display?: PendulumDisplay) {
+        this.display = display ?? new PendulumDisplay();
+    }
+
+    next(dt: number, acceleration: number) {
         this.acceleration = acceleration;
         this.velocity += acceleration * dt;
         this.angle += this.velocity * dt;
+    }
 
+    updatePos(parentPos?: Vector2) {
         this.x = this.length * Math.sin(this.angle) + (parentPos?.x ?? 0);
         this.y = this.length * -Math.cos(this.angle) + (parentPos?.y ?? 0);
     }
@@ -72,8 +78,8 @@ export class PendulumPart implements Vector2 {
         }
         ctx.globalAlpha = 1;        
 
-        this.display.drawPoint(ctx, this, view); // Bob
         this.display.drawLine(ctx, parentPos, this, view); // Rod
+        this.display.drawPoint(ctx, this, view); // Bob
     }
 
 }
@@ -91,7 +97,7 @@ export class PendulumSet {
         if (count === "single") this.count = 1;
         else if (count === "double") this.count = 2;
         else this.count = count;
-        this.parts = Array.from({length: this.count}, (v, k) => new PendulumPart());
+        this.parts = Array.from({length: this.count}, () => new PendulumPart(PendulumDisplay.createRandom({size: 16})));
         this.view = view ?? new View();
     }
 
@@ -139,7 +145,9 @@ export class PendulumSet {
             ) / d2;
             
             this.parts[0].next(dt, a1);
-            this.parts[1].next(dt, a2, this.parts[0]);
+            this.parts[0].updatePos();
+            this.parts[1].next(dt, a2);
+            this.parts[1].updatePos(this.parts[0]);
         }
     }
 
@@ -206,5 +214,15 @@ export class PendulumDisplay {
             ctx.fill();
             ctx.stroke();
         }
+    }
+
+    static createRandom(options: PendulumDisplayOptions = {}): PendulumDisplay {
+        let color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        return new PendulumDisplay({
+            color: color,
+            drawColor: color,
+            drawFadeTime: 5,
+            ...options
+        });
     }
 }

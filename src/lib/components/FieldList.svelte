@@ -1,12 +1,15 @@
 <script lang="ts">
     export let name: string = "";
+    export let updateOnChange: any = null;
 </script>
 <div class="field-list">
     {#if name}
         <h2>{name}</h2>
     {/if}
     <div class="fields">
-        <slot></slot>
+        {#key updateOnChange}
+            <slot></slot>
+        {/key}
     </div>
 </div>
 

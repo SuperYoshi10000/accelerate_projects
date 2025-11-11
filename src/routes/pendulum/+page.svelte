@@ -14,6 +14,10 @@
     let pendulumSet = new PendulumSet(2, view);
     let running = false;
 
+    let controls: Panel;
+
+    let frame = 0; // Used to update display
+
     function draw() {
         if (!ctx) return;
         ctx.fillStyle = background;
@@ -25,8 +29,13 @@
         }
     }
 
-    function update(dt: number, stepMode: boolean = false) {
-        if (running || stepMode) pendulumSet.next(dt);
+    function update(dt: number, stepMode?: boolean) {
+        if (stepMode !== false && (running || stepMode)) {
+            pendulumSet.next(dt);
+            frame++;
+        }
+        pendulumSet.parts[0].updatePos();
+        pendulumSet.parts[1].updatePos(pendulumSet.parts[0]);
         draw();
         // console.log(pendulumSet);
     }
@@ -47,15 +56,23 @@
         ctx = canvas.getContext("2d")!;
         view.x = canvasWidth / 200;
         view.y = canvasHeight / 200;
+        pendulumSet.rootDisplay.color = "gray";
+        pendulumSet.rootDisplay.borderWidth = 0;
         loop();
+    }
+    function reset() {
+        pendulumSet = new PendulumSet(2, view);
+        pendulumSet.rootDisplay.color = "gray";
+        pendulumSet.rootDisplay.borderWidth = 0;
+        update(0, false);
     }
 </script>
 
 <canvas id="pendulum" width={canvasWidth} height={canvasHeight} use:load></canvas>
 
-<Panel top="10px" right="10px" width="420px" maxheight="calc(100% - 20px)" name="Pendulum Controls">
+<Panel bind:this={controls} top="10px" right="10px" width="420px" maxheight="calc(100% - 20px)" name="Pendulum Controls">
     <div id="debug">
-        <FieldList name="Pendulums">
+        <FieldList name="Pendulums" bind:updateOnChange={frame}>
         <Field name="Gravity" value={pendulumSet.gravity} suffix="m/s²" />
         {#each pendulumSet.parts as part, index}
             <FieldList name="Pendulum {index + 1}">
@@ -72,8 +89,9 @@
         </FieldList>
     </div>
 </Panel>
-<Button action={() => running = !running}>{running ? "Pause" : "Start"}</Button>
-<Button action={() => update(1/60, true)}>Step</Button>
+<Button action={() => running = !running} width="100px">{running ? "Pause" : "Start"}</Button>
+<Button action={() => update(1/60, true)} width="100px">Step</Button>
+<Button action={reset} width="100px">Reset</Button>
 
 <style>
     :global(body) {
