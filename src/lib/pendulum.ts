@@ -48,7 +48,7 @@ export class PendulumPart implements Vector2 {
         this.angle += this.velocity * dt;
 
         this.x = this.length * Math.sin(this.angle) + (parentPos?.x ?? 0);
-        this.y = -(this.length * Math.cos(this.angle) + (parentPos?.y ?? 0));
+        this.y = this.length * -Math.cos(this.angle) + (parentPos?.y ?? 0);
     }
 
     draw(ctx: CanvasRenderingContext2D, time: number, parentPos: Vector2, view: View) {
@@ -139,7 +139,7 @@ export class PendulumSet {
             ) / d2;
             
             this.parts[0].next(dt, a1);
-            this.parts[1].next(dt, a2);
+            this.parts[1].next(dt, a2, this.parts[0]);
         }
     }
 

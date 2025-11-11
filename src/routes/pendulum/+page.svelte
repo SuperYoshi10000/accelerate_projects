@@ -59,14 +59,14 @@
         <Field name="Gravity" value={pendulumSet.gravity} suffix="m/s²" />
         {#each pendulumSet.parts as part, index}
             <FieldList name="Pendulum {index + 1}">
-                <Field name="Rod Length" bind:value={part.length} suffix="m" />
-                <Field name="Mass" bind:value={part.mass} suffix="kg" />
+                <Field name="Rod Length" type="number" bind:value={part.length} suffix="m" />
+                <Field name="Mass" type="number" bind:value={part.mass} suffix="kg" />
                 <hr>
-                <Field name="Angle" bind:value={part.angle} suffix="rad" />
-                <Field name="Velocity" bind:value={part.velocity} suffix="rad/s" />
-                <Field name="Acceleration" bind:value={part.acceleration} readonly suffix="rad/s²" />
-                <Field name="X" bind:value={part.x} readonly suffix="m" />
-                <Field name="Y" bind:value={part.y} readonly suffix="m" />
+                <Field name="Angle" type="number" bind:value={part.angle} suffix="rad" />
+                <Field name="Velocity" type="number" bind:value={part.velocity} suffix="rad/s" />
+                <Field name="Acceleration" type="number" bind:value={part.acceleration} readonly suffix="rad/s²" />
+                <Field name="X" type="number" bind:value={part.x} readonly suffix="m" />
+                <Field name="Y" type="number" bind:value={part.y} readonly suffix="m" />
             </FieldList>
         {/each}
         </FieldList>

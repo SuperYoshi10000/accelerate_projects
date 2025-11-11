@@ -4,10 +4,11 @@
     
     export let value: string|number|object|undefined = undefined;
     export let readonly: boolean = false;
+    export let type: string = "text";
 </script>
 <div style=""><b>{name}</b>
     {#if value !== undefined}<span>
-        <input bind:value {readonly} style="{suffix ? ` padding-right: calc(8px + ${suffix.length}ch);` : ''}"/>
+        <input bind:value {type} {readonly} style="{suffix ? ` padding-right: calc(8px + ${suffix.length}ch);` : ''}"/>
         {#if suffix}
             <span class="suffix">{suffix}</span>
         {/if}
