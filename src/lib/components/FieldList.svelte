@@ -1,6 +1,7 @@
 <script lang="ts">
     export let name: string = "";
     export let updateOnChange: any = null;
+    export const id: string | number | null = null;
 </script>
 <div class="field-list">
     {#if name}

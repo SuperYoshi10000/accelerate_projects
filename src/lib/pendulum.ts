@@ -166,7 +166,7 @@ export interface PendulumDisplayOptions {
     drawWidth?: number;
     drawFadeTime?: number;
 }
-export class PendulumDisplay {
+export class PendulumDisplay implements PendulumDisplayOptions {
     color: string;
     size: number;
     borderColor: string;
